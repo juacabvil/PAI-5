@@ -1,0 +1,135 @@
+{% extends 'main/base.html' %}
+
+{% block titulo %} Security Team 4 {% endblock %}
+
+{% block contenido %} 
+<head>
+  <meta charset="UTF-8">
+  <title>Hospital Warehouse APP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.6.22/css/uikit.min.css" integrity="sha512-6D/ljZaZ5tMxTKJ1b9v4xHZWyP2l4GJGaqilgWHzj0UkwCKGwlNVBbjVdIPa/8lQfR3W8nzX0tUkOyfUQkT6tg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+</head>
+
+<form class="uk-form-horizontal uk-margin-large" id='formulario' method="POST"  onsubmit="{% url 'pedido' %}">
+  {% csrf_token %}
+  <div class="uk-margin">
+      <label class="uk-form-label uk-text-bold uk-margin-right" for="input_numero_camas">Camas</label>
+      <div class="uk-form-controls">
+          <input class="uk-checkbox uk-margin-small-right" type="checkbox" id="checkBox_camas" name="checkBox_camas">
+          <input class="uk-input" type="number" id="input_numero_camas" name="input_numero_camas" placeholder="Número de camas (0-300)">
+      </div>
+  </div>
+
+  <div class="uk-margin">
+      <label class="uk-form-label uk-text-bold uk-margin-right" for="input_numero_sabanas">Sábanas</label>
+      <div class="uk-form-controls">
+          <input class="uk-checkbox uk-margin-small-right" type="checkbox" id="checkBox_sabanas" name="checkBox_sabanas">
+          <input class="uk-input" type="number" id="input_numero_sabanas" name="input_numero_sabanas" placeholder="Número de sábanas (0-300)">
+      </div>
+  </div>
+
+  <div class="uk-margin">
+      <label class="uk-form-label uk-text-bold " for="input_numero_sillas">Sillas</label>
+      <div class="uk-form-controls">
+          <input class="uk-checkbox uk-margin-small-right" type="checkbox" id="checkBox_sillas" name="checkBox_sillas">
+          <input class="uk-input" type="number" id="input_numero_sillas" name="input_numero_sillas" placeholder="Número de sillas (0-300)">
+      </div>
+  </div>
+
+  <div class="uk-margin">
+      <label class="uk-form-label uk-text-bold uk-margin-right" for="input_numero_sillones">Sillones</label>
+      <div class="uk-form-controls">
+          <input class="uk-checkbox uk-margin-small-right" type="checkbox" id="checkBox_sillones" name="checkBox_sillones">
+          <input class="uk-input" type="number" id="input_numero_sillones" name="input_numero_sillones" placeholder="Número de sillones (0-300)">
+      </div>
+  </div>
+
+  <!-- Agrega un campo oculto para la firma -->
+  <input type="hidden" name="signature" id="signature">
+
+
+  <button class="uk-button" type="button" id="button_send" name="button_send" onclick="calcularFirma()">Enviar</button>
+</form>
+
+<script>
+  function validarFormulario() {
+    // Comprobar si al menos un checkbox está marcado
+    var checkBoxes = document.querySelectorAll('input[type="checkbox"]');
+    var alMenosUnCheckboxMarcado = false;
+    for (var i = 0; i < checkBoxes.length; i++) {
+        if (checkBoxes[i].checked) {
+            alMenosUnCheckboxMarcado = true;
+            break;
+        }
+    }
+    if (!alMenosUnCheckboxMarcado) {
+        alert("Debe marcar al menos un checkbox");
+        return false;
+    }
+  
+    // Comprobar que los números están en el rango 1-300
+    var inputsNumeros = document.querySelectorAll('input[type="number"]');
+    for (var i = 0; i < inputsNumeros.length; i++) {
+        var inputNumero = inputsNumeros[i];
+        if (inputNumero.value.trim() !== "") {
+            var numero = parseInt(inputNumero.value);
+            if (isNaN(numero) || numero < 1 || numero > 300) {
+                alert("Los números deben estar en el rango 1-300");
+                return false;
+            }
+            // Comprobar que el checkbox correspondiente está marcado
+            var checkboxId = "checkBox_" + inputNumero.id.split("_")[2];
+            var checkbox = document.getElementById(checkboxId);
+            if (!checkbox.checked) {
+                alert("No puede enviar un número si su checkbox no está marcado");
+                return false;
+            }
+        } else {
+            // Verificar si el checkbox correspondiente está marcado
+            var checkboxId = "checkBox_" + inputNumero.id.split("_")[2];
+            var checkbox = document.getElementById(checkboxId);
+            if (checkbox.checked) {
+                alert("Debe ingresar un número en el campo correspondiente al checkbox marcado");
+                return false;
+            }
+        }
+    }
+  
+    return true;
+  }
+  
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<script>
+    function calcularFirma() {
+
+      if(validarFormulario()){
+        // Obtener los valores de los campos del formulario
+        var numero_camas = document.getElementById("input_numero_camas").value;
+        var numero_sabanas = document.getElementById("input_numero_sabanas").value;
+        var numero_sillas = document.getElementById("input_numero_sillas").value;
+        var numero_sillones = document.getElementById("input_numero_sillones").value;
+        
+        // Concatenar los valores de los campos del formulario en una cadena
+        var cadena_datos = numero_camas + numero_sabanas + numero_sillas + numero_sillones;
+        
+        // Calcular la firma utilizando la función hash SHA-256
+        var firma = CryptoJS.SHA256(cadena_datos);
+        
+        // Agregar la firma al formulario como un campo oculto
+        document.getElementById("signature").value = firma;
+        
+        // Enviar el formulario
+        document.getElementById("formulario").submit();
+
+      }
+    }
+</script>
+
+
+
+
+  {% endblock %}
+  

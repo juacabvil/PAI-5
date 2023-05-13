@@ -1,0 +1,78 @@
+.header {
+    padding: 60px;
+    text-align: center;
+    background-image: url("https://www.rgis.co.uk/wp-content/uploads/2023/04/banner-healthcare-hospital-asset-management-1024x442.png");
+    opacity: 0.6;
+    font-weight: bold;
+    font-size: 50px;
+  }
+
+/* Small screens (mobile) */
+@media only screen and (max-width: 600px) {
+  form {
+    margin: 10px auto;
+    padding: 10px;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  label {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  input[type="number"] {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  button[type="submit"] {
+    font-size: 16px;
+  }
+}
+
+/* Medium screens (tablet) */
+@media only screen and (min-width: 601px) and (max-width: 960px) {
+  form {
+    margin: 30px auto;
+    padding: 20px;
+  }
+  h1 {
+    font-size: 28px;
+  }
+  label {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  input[type="number"] {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  button[type="submit"] {
+    font-size: 18px;
+  }
+}
+
+/* Large screens (desktop) */
+@media only screen and (min-width: 961px) {
+  form {
+    max-width: 40em;
+    margin: 50px auto;
+    padding: 20px;
+  }
+  h1 {
+    font-size: 36px;
+    margin-bottom: 30px;
+  }
+  label {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  input[type="number"] {
+    width: 100%;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  button[type="submit"] {
+    font-size: 18px;
+  }
+}
+  

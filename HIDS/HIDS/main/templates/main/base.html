@@ -1,0 +1,60 @@
+{% load static %} 
+
+<!DOCTYPE html>
+<html lang='es'>
+  <head>
+    <title>WareHouse App</title>
+	<meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="{% static 'css/uikit.min.css' %}" />
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        <script src="{% static 'js/uikit.min.js' %}"></script>
+  </head>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  
+  <body>
+
+	<a href="/index/" > <h1 class="header"></h1></a>
+    <nav class="uk-navbar-container justify-content-center" uk-navbar>
+    <div class="nav justify-content-center ">
+
+        <ul class="uk-navbar-nav">
+
+            <li><a href="/pedido">Realizar pedido</a>
+                <div class="uk-navbar-dropdown">
+                    <ul class="uk-nav uk-navbar-dropdown-nav">
+						<li><a href="/pedido">Iniciar</a></li>
+                    </ul>
+                </div>
+            </li>
+
+           <li><a href="#">Informe mensual</a>
+            <div class="uk-navbar-dropdown">
+                <ul class="uk-nav uk-navbar-dropdown-nav">
+                    <li><a href="/informe">Consultar</a></li>
+                </ul>
+               
+            </div>
+            </li>
+
+            <li><a href="#">Pedido falsificado</a>
+                <div class="uk-navbar-dropdown">
+                    <ul class="uk-nav uk-navbar-dropdown-nav">
+                        <li><a href="/pedidofalso">Pedir</a></li>
+                    </ul>
+                   
+                </div>
+                </li>
+        </ul>
+
+    </div>
+    </nav>
+	<h1 class="uk-heading-medium uk-text-center">Hospital Warehouse APP</h1>    
+
+		<hr>
+ 		
+ 		<h3 >{% block titulo %} {% endblock %}</h3>
+
+		{% block contenido %} {% endblock %}
+  </body>
+</html>
