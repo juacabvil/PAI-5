@@ -47,6 +47,9 @@
   <!-- Agrega un campo oculto para la firma -->
   <input type="hidden" name="signature" id="signature">
 
+  <!-- Agrega un campo oculto para la firma -->
+  <input type="hidden" name="public_key" id="public_key">
+
 
   <button class="uk-button" type="button" id="button_send" name="button_send" onclick="calcularFirma()">Enviar</button>
 </form>
@@ -100,8 +103,7 @@
   
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
 <script>
     function calcularFirma() {
 
@@ -114,13 +116,25 @@
         
         // Concatenar los valores de los campos del formulario en una cadena
         var cadena_datos = numero_camas + numero_sabanas + numero_sillas + numero_sillones;
-        
-        // Calcular la firma utilizando la función hash SHA-256
-        var firma = CryptoJS.SHA256(cadena_datos);
-        
+
+        // Generar un par de claves pública y privada con RSA
+        var keypair = forge.pki.rsa.generateKeyPair({bits: 2048});
+
+        // Firmar la cadena de datos con la clave privada
+        var md = forge.md.sha256.create();
+        md.update(cadena_datos, 'utf8');
+        var signature = keypair.privateKey.sign(md);
+
+        // Convertir la firma a un formato base64 para incluirla en el formulario
+        var signature_base64 = forge.util.encode64(signature);
+
         // Agregar la firma al formulario como un campo oculto
-        document.getElementById("signature").value = firma;
+        document.getElementById("signature").value = signature_base64;
         
+        // Agregar la clave pública al formulario como un campo oculto
+        var public_key_pem = forge.pki.publicKeyToPem(keypair.publicKey);
+        document.getElementById("public_key").value = public_key_pem;
+
         // Enviar el formulario
         document.getElementById("formulario").submit();
 

@@ -6,13 +6,15 @@ from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.backends import default_backend
 from datetime import datetime, timedelta
 from django.conf import settings
-import hashlib
-import re
 from django.middleware.csrf import get_token
 from django.template.context_processors import csrf
 from django.middleware import csrf
 import requests
 from django.views.decorators.csrf import csrf_exempt
+import base64
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.Hash import SHA256
 
 
 
@@ -27,17 +29,15 @@ def pedido(request):
         numero_sabanas = request.POST.get('input_numero_sabanas')
         numero_sillas = request.POST.get('input_numero_sillas')
         numero_sillones = request.POST.get('input_numero_sillones')
-        firma = request.POST.get('signature')
-        print(firma)
-        if firma == verify_signature(numero_camas, numero_sabanas, numero_sillas, numero_sillones):
+        signature_base64 = request.POST.get('signature')
+        public_key_pem = request.POST.get('public_key')
+        
+        if  verify_signature(numero_camas, numero_sabanas, numero_sillas, numero_sillones, signature_base64, public_key_pem):
             log_pedidos_correctos(numero_camas, numero_sabanas, numero_sillas, numero_sillones)
             # Retorna una respuesta adecuada
-            
-            tendencias()
             return render(request, 'main/index.html')
         else:
             log_pedidos_incorrectos()
-            
             return HttpResponse('Invalid signature')
 
         # Realiza las validaciones que necesites con los datos recibidos
@@ -68,58 +68,35 @@ def log_pedidos_incorrectos():
     with open("incorrectos.txt", "a") as archivo:
             archivo.write(pedido + "\n")
 
-def verify_signature(numero_camas, numero_sabanas, numero_sillas, numero_sillones):
-    
+def verify_signature(numero_camas, numero_sabanas, numero_sillas, numero_sillones, signature_base64, public_key_pem):
     cadena_datos = str(numero_camas) + str(numero_sabanas) + str(numero_sillas) + str(numero_sillones)
-    # Calcular la firma utilizando la función hash SHA-256
-    firma = hashlib.sha256(cadena_datos.encode()).hexdigest()
+    signature = base64.b64decode(signature_base64)
 
-    return firma
+    # Convertir la clave pública en formato PEM a un objeto RSA
+    public_key = RSA.importKey(public_key_pem)
+
+    # Verificar la firma utilizando la clave pública
+    h = SHA256.new(cadena_datos.encode('utf-8'))
+    verifier = PKCS1_v1_5.new(public_key)
+    return verifier.verify(h, signature)
    
-def tendencias():
-
-    # Read the text file
-    with open('pedidos.txt', 'r') as file:
-        text = file.read()
-
-    # Extract the date and number using regular expressions
-    date_pattern = r'Pedido realizado el (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'
-    number_pattern = r'Camas: (\d+)'
-
-    date_match = re.search(date_pattern, text)
-    number_match = re.search(number_pattern, text)
-
-    if date_match and number_match:
-        date = date_match.group(1)
-        number = number_match.group(1)
-    else:
-        print("No match found.")
-    return
-
 
 def pedido_falso(request):
     
-    url = "http://localhost:8000/pedido/"
-    
-    response = requests.get(url)
+    # Definir una firma y clave pública falsas simulando man in the middle 
+    signature_base64 = 'c2lnbmF0dXJlX2Jhc2U2NA=='
+    public_key_pem = '-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5t2UWQDdLgVbMvJXqwMnJfA8G\naOT22bF+eK/sq39dS0xPKPjvoDmzHpmPzFhKln1MJ//7Lm+9fDe3qkEz3qTZK6Y9\nEoebW7Z7T+zTZDbb6+7Kk3VP0MBcVEk27gKv0GWeVWd7YU5/fb7rJmkCzQZlk6+R\npW9JH8bJ1bMSI+O4pwIDAQAB\n-----END PUBLIC KEY-----'
 
-    # Datos del formulario a enviar
     data = {
-        'checkBox_camas': 'on',
-        'input_numero_camas': 2,
-        'checkBox_sabanas': 'on',
-        'input_numero_sabanas': 4,
-        'checkBox_sillas': 'on',
-        'input_numero_sillas': 6,
-        'checkBox_sillones': 'on',
-        'input_numero_sillones': 8,
-        'signature': '12345'
+        'input_numero_camas': '2',
+        'input_numero_sabanas': '4',
+        'input_numero_sillas': '6',
+        'input_numero_sillones': '8',
+        'signature': signature_base64,
+        'public_key': public_key_pem,
     }
-    
 
-    response = requests.post(url, data=data)
-    print(response.text)
-    # Mostrar la respuesta del servidor
+    response = requests.post('http://localhost:8000/pedido/', data=data)
     
     return (render(request, 'main/index.html'))
     
