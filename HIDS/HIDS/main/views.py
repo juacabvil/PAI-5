@@ -183,7 +183,7 @@ def calcular_tendencia(data, fake_data):
             p_values.append(p)
         else:
             p_values.append(0)
-    
+
     trend = "NULA"
     if len(p_values) >= 3:
         p1 = p_values[-3]
@@ -193,5 +193,19 @@ def calcular_tendencia(data, fake_data):
             trend = "POSITIVA"
         elif p3 < p1 or p3 < p2:
             trend = "NEGATIVA"
+
+    # Escribir los resultados en un archivo de texto
+    with open('resultados.txt', 'w') as file:
+        month = datetime.now().strftime("%B %Y")
+        p_value = p_values[-1]
+        if trend == "POSITIVA":
+            trend_char = "+"
+        elif trend == "NEGATIVA":
+            trend_char = "-"
+        else:
+            trend_char = "0"
+        file.write(f"{month}\t{p_value:.2f}\t{trend_char}\n")
+
     return trend
+
 

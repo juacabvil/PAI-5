@@ -2,3 +2,4 @@ Pedido correcto realizado el 2023-05-14 11:26:38. Cantidad de productos: Camas: 
 Pedido correcto realizado el 2023-05-14 12:09:15. Cantidad de productos: Camas: 1
 Pedido correcto realizado el 2023-05-14 12:10:00. Cantidad de productos:, Sabanas: 1
 Pedido correcto realizado el 2023-05-14 12:10:07. Cantidad de productos:, Sillas: 4
+Pedido correcto realizado el 2023-05-14 12:35:04. Cantidad de productos: Camas: 1
