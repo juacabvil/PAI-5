@@ -166,9 +166,32 @@ def informe(request):
     data = list(orders_by_month.values())
     fake_labels = list(fake_orders_by_month.keys())
     fake_data = list(fake_orders_by_month.values())
-
+    
+    
+    trend = calcular_tendencia(data, fake_data)
     # Return the labels and data as a tuple
-    context = {'data': data, 'labels': labels, 'fake_data': fake_data, 'fake_labels': fake_labels}
+    context = {'data': data, 'labels': labels, 'fake_data': fake_data, 'fake_labels': fake_labels, 'trend': trend}
     return render(request, 'main/informe.html', context)
 
+
+def calcular_tendencia(data, fake_data):
+    p_values = []
+    for i in range(len(data)):
+        total_orders = data[i] + fake_data[i]
+        if total_orders > 0:
+            p = data[i] / total_orders
+            p_values.append(p)
+        else:
+            p_values.append(0)
     
+    trend = "NULA"
+    if len(p_values) >= 3:
+        p1 = p_values[-3]
+        p2 = p_values[-2]
+        p3 = p_values[-1]
+        if (p3 > p1 and p3 > p2) or (p3 > p1 and p3 == p2) or (p3 == p1 and p3 > p2):
+            trend = "POSITIVA"
+        elif p3 < p1 or p3 < p2:
+            trend = "NEGATIVA"
+    return trend
+
