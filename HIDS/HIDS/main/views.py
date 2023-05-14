@@ -15,6 +15,10 @@ import base64
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA256
+from django.utils import timezone
+from django.http import HttpResponseForbidden
+
+from .models import RequestLog
 
 
 
@@ -23,6 +27,15 @@ def index(request):
 
 @csrf_exempt
 def pedido(request):
+    # Verifica si la dirección IP ha hecho más de tres solicitudes dentro de las últimas cuatro horas
+    ip_address = request.META.get('REMOTE_ADDR')
+    last_four_hours = timezone.now() - timezone.timedelta(hours=4)
+    requests_count = RequestLog.objects.filter(ip_address=ip_address, created_at__gte=last_four_hours).count()
+
+
+    if requests_count >= 3:
+        # Bloquea la dirección IP si ha hecho más de tres solicitudes dentro de las últimas cuatro horas
+        return HttpResponseForbidden('Ha excedido el límite de peticiones en las últimas 4 horas.')
     
     if request.method == 'POST':    
         numero_camas = request.POST.get('input_numero_camas')
@@ -32,12 +45,22 @@ def pedido(request):
         signature_base64 = request.POST.get('signature')
         public_key_pem = request.POST.get('public_key')
         
-        if  verify_signature(numero_camas, numero_sabanas, numero_sillas, numero_sillones, signature_base64, public_key_pem):
+        if verify_signature(numero_camas, numero_sabanas, numero_sillas, numero_sillones, signature_base64, public_key_pem):
+            # Registra la solicitud entrante
+            RequestLog.objects.create(ip_address=ip_address)
+            
+            # Registra el pedido correcto
             log_pedidos_correctos(numero_camas, numero_sabanas, numero_sillas, numero_sillones)
+            
             # Retorna una respuesta adecuada
             return render(request, 'main/index.html')
         else:
+            # Registra la solicitud entrante
+            RequestLog.objects.create(ip_address=ip_address)
+            
+            # Registra el pedido incorrecto
             log_pedidos_incorrectos()
+            
             return HttpResponse('Invalid signature')
 
         # Realiza las validaciones que necesites con los datos recibidos
