@@ -1,14 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives.serialization import load_pem_public_key
-from cryptography.hazmat.backends import default_backend
-from datetime import datetime, timedelta
-from django.conf import settings
-from django.middleware.csrf import get_token
-from django.template.context_processors import csrf
-from django.middleware import csrf
+from datetime import datetime
 import requests
 from django.views.decorators.csrf import csrf_exempt
 import base64
